@@ -22,7 +22,7 @@ Beware that used Python version of this project is [3.8.3](https://www.python.or
 
 ### User Interface Elements
 
-Pygame itself does not provide any sorts of UI Elements more than a label that does not have any function. In the [ui_elements.py](https://github.com/ErtyumPX/PyGameEngine/blob/main/Engine/core/ui_elements.py) you can find the essential UI elements; texts, buttons with just texts or images and input boxes with core functionalities for adjusting and aligning.
+Pygame itself does not provide any sorts of UI Elements more than a label that does not have any function. In the [ui_elements.py](https://github.com/ErtyumPX/PyGameEngine/blob/main/engine/core/ui_elements.py) you can find the essential UI elements; texts, buttons with just texts or images and input boxes with core functionalities for adjusting and aligning.
 
 There will be a multi-line supporting input box after fixing some certain bugs.
 
@@ -32,7 +32,7 @@ There will be a multi-line supporting input box after fixing some certain bugs.
 
 ### Animation
 
-An [animation library](https://github.com/ErtyumPX/PyGameEngine/blob/main/Engine/core/animation.py), to change a variable from one value to another by using threading. It has two main functions: By Speed and By Duration.
+An [animation library](https://github.com/ErtyumPX/PyGameEngine/blob/main/engine/core/animation.py), to change a variable from one value to another by using threading. It has two main functions: By Speed and By Duration.
 
 By Speed function changes the value by a certain amount in every frame, usefull for situations when the speed is defined but the duration of the animation is not important.
 
@@ -40,7 +40,7 @@ By Duration function changes the value in a linearly and reaches to the end poin
 
 ### Renderer
 
-A little [render manager](https://github.com/ErtyumPX/PyGameEngine/blob/main/Engine/core/renderer.py) for updating and rendering all objects in one function in every scene. Once you register an object, it will rendered every time render method of the renderer is called, until it is removed from the render manager.
+A little [render manager](https://github.com/ErtyumPX/PyGameEngine/blob/main/engine/core/renderer.py) for updating and rendering all objects in one function in every scene. Once you register an object, it will rendered every time render method of the renderer is called, until it is removed from the render manager.
 
 ## Other Practices Used By The Author
 
