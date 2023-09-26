@@ -2,9 +2,6 @@ import pygame
 import numpy as np
 from scene import Scene
 from math import sqrt
-from animation import Timer
-
-timer = Timer()
 
 class Game:
     def __init__(self, first_scene:Scene, frame_rate:int):
@@ -13,7 +10,7 @@ class Game:
         self.frame_rate = frame_rate
         self.clock = pygame.time.Clock()
 
-        self.last_function = lambda: print("End of the game.")
+        self.last_function = lambda: 0
 
     def run(self): 
         while self.active_scene is not None:
@@ -43,6 +40,7 @@ class Game:
 
         # Call last function before shutting down the window
         self.last_function()
+        print("End of the game.")
 
 
 

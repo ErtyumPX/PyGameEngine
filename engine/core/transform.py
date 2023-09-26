@@ -7,7 +7,6 @@ class Transform:
 		self.angle = angle
 		self.color = color
 
-	@property
 	def __repr__(self):
 		return self.x, self.y, self.width, self.height
 
