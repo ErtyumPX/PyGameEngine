@@ -1,10 +1,13 @@
+# This is script is made to show suggested practice example for the engine
+# Files in the practices folder are not required for the engine to work
+# Yet they need to be accessing the engine to work so they are commented out and presented here
+"""
 import pygame
 from game import *
 import defaults, time
-
-#SCENES
+# First/starter scene
 from menu_scene import MenuScene
-from game_scene import GameScene
+
 
 pygame.init()
 
@@ -16,5 +19,5 @@ root = pygame.display.set_mode(size)
 pygame.display.set_caption(defaults.WINDOW_NAME)
 
 game = Game(MenuScene(root), defaults.FRAME_RATE)
-
 game.run()
+"""
