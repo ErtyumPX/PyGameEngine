@@ -35,4 +35,4 @@ class RenderManager:
 			self.surface.fill(self.background_color)
 		for layer in self.objects.values():
 			for obj in layer:
-				obj.update()
+				obj.render()
