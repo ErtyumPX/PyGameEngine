@@ -9,12 +9,14 @@
 # TODO: Hotkeys could be added and bound to interactable elements
 
 import pygame
+from pygame import Surface
 from pygame.rect import Rect
 from enum import Enum
 import re
 
 EMPTY_FUNCTION = lambda: 0
 DEFAULT_FONT_PATH = 'data/SpaceMono-Regular.ttf'
+VALID_INPUT_CHARACTERS = r'[^\.A-Za-z0-9 _]'
 
 """
 class InterfaceElement:
@@ -47,11 +49,11 @@ class Alignment(Enum):
 	RIGHT_BOTTOM = 8
 
 class InterfaceElement:
-	def __init__(self, root_surface:pygame.Surface, 
+	def __init__(self, root_surface:Surface, 
 			  	status:InterfaceStatus = InterfaceStatus.VISIBLE, 
 			  	x:int = 0, y:int = 0, width:int = 0, height:int = 0, 
 				alignment:Alignment = Alignment.LEFT_TOP):
-		self.root_surface:pygame.Surface = root_surface
+		self.root_surface:Surface = root_surface
 		self.rect:Rect = Rect(x, y, width, height)
 		self.status:InterfaceStatus = status
 		self._alignment:Alignment = alignment
@@ -139,7 +141,7 @@ class ImageButton(pygame.sprite.Sprite, InterfaceElement):
 		self.highlight_offset = highlight_offset
 		if highlight_color:
 			image_size = image.get_size()
-			self.effect = pygame.Surface((image_size[0]+highlight_offset[0], image_size[1]+highlight_offset[1]), pygame.SRCALPHA)
+			self.effect = Surface((image_size[0]+highlight_offset[0], image_size[1]+highlight_offset[1]), pygame.SRCALPHA)
 			self.effect.fill(highlight_color)
 
 	def update(self):
@@ -161,7 +163,7 @@ class Text(InterfaceElement):
 		self.color:tuple = color
 		self.font_size = font_size
 		self.font:pygame.font.Font = pygame.font.Font(DEFAULT_FONT_PATH, font_size)
-		self.surface:pygame.Surface = self.font.render(self.text, True, color)
+		self.surface:Surface = self.font.render(self.text, True, color)
 		InterfaceElement.__init__(self, root_surface, status, x, y, 
 								self.surface.get_width(), 
 								self.surface.get_height(), alignment)
@@ -181,12 +183,7 @@ class Text(InterfaceElement):
 	def render(self):
 		if self.status == InterfaceStatus.INVISIBLE: return
 		self.root_surface.blit(self.surface, (self.rect.x, self.rect.y))
-"""
-self, root_surface, x:int = 0, y:int = 0, 
-alignment:Alignment = Alignment.LEFT_TOP, 
-text:str = "New Text", font_size:int = 11, color:tuple = (0,0,0), 
-status:int = InterfaceStatus.VISIBLE
-"""
+
 
 class InteractablePhase(Enum):
 	DEFAULT = 0
@@ -197,24 +194,35 @@ class InteractablePhase(Enum):
 #	pass
 
 class Button(InterfaceElement):
-	def __init__(self, root_surface, x:int = 0, y:int = 0, width:int = 100, height:int = 25, 
-			  	func=EMPTY_FUNCTION, args:tuple=(), kwargs:dict={}, 
+	def __init__(self, root_surface, x: int = 0, y: int = 0, width: int = 100, height: int = 25, 
+			  	click_fuction: callable=EMPTY_FUNCTION, args: tuple = tuple(), kwargs: dict = {}, 
 				text="Button", font_size=11,
-				background:tuple = (190,190,190), foreground:tuple = (0,0,0),
-				border_color:tuple = (0,0,0), border_width:int = 4,
-				status:InterfaceStatus = InterfaceStatus.VISIBLE,
-				alignment:Alignment = Alignment.LEFT_TOP,
-				hovering_color:tuple = (0,0,0,50), pressed_color:tuple = (0,0,0,150)):
-		self.surface = pygame.Surface((width, height))
+				background: tuple = (190,190,190), foreground: tuple = (0,0,0),
+				border_color: tuple = (0,0,0), border_width: int = 4,
+				status: InterfaceStatus = InterfaceStatus.VISIBLE,
+				alignment: Alignment = Alignment.LEFT_TOP,
+				hover_color: tuple = (0,0,0,50), pressed_color: tuple = (0,0,0,150),
+				hover_event: callable = EMPTY_FUNCTION, hover_args:tuple = tuple(), hover_kwargs:dict = {},
+				pressed_event: callable = EMPTY_FUNCTION, pressed_args:tuple = tuple(), pressed_kwargs:dict = {}):
+		self.surface = Surface((width, height))
 		self.surface.fill(background)
 		pygame.draw.rect(self.surface, border_color, (0, 0, width, height), border_width)
 
-		self.phase:InteractablePhase = InteractablePhase.DEFAULT
-		self.effect_surface:pygame.Surface = pygame.Surface((width, height), pygame.SRCALPHA).convert_alpha()
-		self.hovering_color = hovering_color
-		self.pressed_color = pressed_color
+		self.phase: InteractablePhase = InteractablePhase.DEFAULT
+		self.effect_surface: Surface = Surface((width, height), pygame.SRCALPHA).convert_alpha()
+		self.hover_color: tuple = hover_color
+		self.pressed_color: tuple = pressed_color
 
-		self.func:function = func
+		# Events
+		self.hover_event: callable = hover_event
+		self.hover_args: tuple = hover_args
+		self.hover_kwargs: dict = hover_kwargs
+
+		self.pressed_event: callable = pressed_event
+		self.pressed_args: tuple = pressed_args
+		self.pressed_kwargs: dict = pressed_kwargs
+
+		self.click_function: callable = click_fuction
 		self.args:tuple = args
 		self.kwargs:dict = kwargs
 
@@ -223,8 +231,17 @@ class Button(InterfaceElement):
 		self.text:Text = Text(root_surface, self.rect.centerx, self.rect.centery, text, 
 							font_size, foreground, Alignment.CENTER)
 
-	def press(self):
-		self.func(*self.args, **self.kwargs)
+	def hover_event(self):
+		self.phase = InteractablePhase.HOVER
+		self.hover_event(*self.hover_args, **self.hover_kwargs)
+	
+	def pressed_event(self):
+		self.phase = InteractablePhase.PRESSED
+		self.pressed_event(*self.pressed_args, **self.pressed_kwargs)
+
+	def click(self):
+		self.click_function(*self.args, **self.kwargs)
+		self.phase = InteractablePhase.HOVER
 
 	def render(self):
 		if self.status == InterfaceStatus.INVISIBLE: return
@@ -234,7 +251,7 @@ class Button(InterfaceElement):
 
 		if self.phase == InteractablePhase.DEFAULT: return
 		if self.phase == InteractablePhase.HOVER:
-			self.effect_surface.fill(self.hovering_color)
+			self.effect_surface.fill(self.hover_color)
 		elif self.phase == InteractablePhase.PRESSED:
 			self.effect_surface.fill(self.pressed_color)
 		self.root_surface.blit(self.effect_surface, (self.rect.x, self.rect.y))
@@ -275,27 +292,81 @@ class InputBox(pygame.sprite.Sprite, InterfaceElement):
 			self.text_box = self.font.render(self.text, True, self.color)
 		self.surface.blit(self.text_box, (self.x + 7.5, self.y + 4))
 """
+SIDE_MARGIN = 5
+class InputBox(InterfaceElement):
+	def __init__(self, root_surface, x:int = 0, y:int = 0, width:int = 100, height:int = 25, 
+				font_size=11, background:tuple = (190, 190, 190), 
+				foreground:tuple = (0, 0, 0), border_color:tuple = (0, 0, 0), 
+				border_width:int = 4, status:InterfaceStatus = InterfaceStatus.VISIBLE,
+				alignment:Alignment = Alignment.LEFT_TOP, 
+				place_holder_text="Enter Text...", place_holder_color:tuple = (80, 80, 80),
+				hovering_cursor: pygame.Cursor = pygame.cursors.diamond):
+		self.surface = Surface((width, height))
+		self.surface.fill(background)
+		pygame.draw.rect(self.surface, border_color, (0, 0, width, height), border_width)
+
+		self.hovering_cursor: pygame.Cursor = hovering_cursor
+		self._selected: bool = False
+
+		InterfaceElement.__init__(self, root_surface, status, x, y, 
+								width, height, alignment)
+		self.place_holder:Text = Text(root_surface, self.rect.left + SIDE_MARGIN, self.rect.centery, place_holder_text, 
+									font_size, place_holder_color, Alignment.LEFT)
+		self.text:Text = Text(root_surface, self.rect.left + SIDE_MARGIN, self.rect.centery, str(), 
+									font_size, foreground, Alignment.LEFT)
+	@property
+	def selected(self):
+		return self._selected
+
+	@selected.setter
+	def selected(self, new_selected):
+		self._selected = new_selected
+
+	def add(self, char):
+		if re.search(VALID_INPUT_CHARACTERS, char):
+			return
+		new_text = self.text.text + char
+		if(self.text.font.size(new_text)[0] > self.rect.width - SIDE_MARGIN*2): # 5 pixel margin from each side
+			return
+		self.text.change_text_to(new_text)
+
+	def remove(self):
+		# This will be used when cursor is added
+		# self.text.change_text_to(self.text.text[:index] + self.text.text[index + 1:])
+		self.text.change_text_to(self.text.text[:-1])
+	
+	def clear(self):
+		self.text.change_text_to(str())
+
+	def render(self):
+		if self.status == InterfaceStatus.INVISIBLE: return
+		self.root_surface.blit(self.surface, (self.rect.x, self.rect.y))
+		if len(self.text.text) == 0 and not self.selected:
+			self.place_holder.render()
+		else:
+			self.text.render()
+
+
 
 def ProcessElements(events, pressed_keys, mouse_pos, elements:list = [], inputs:list = [], texts:list = []):
 	for element_ in elements:
 		if ElementCollide(element_, mouse_pos):
 			if element_.phase != InteractablePhase.PRESSED:
-				element_.phase = InteractablePhase.HOVER
+				element_.hover_event()
 		else:
 			element_.phase = InteractablePhase.DEFAULT
+	
 	for event in events:
 		if event.type == pygame.MOUSEBUTTONDOWN:
 			for element_ in elements:
 				if element_.phase == InteractablePhase.HOVER and element_.status == InterfaceStatus.VISIBLE:
-					element_.phase = InteractablePhase.PRESSED
+					element_.pressed_event()
 
 		elif event.type == pygame.MOUSEBUTTONUP:
 			for element_ in elements:
 				if element_.phase == InteractablePhase.PRESSED and element_.status == InterfaceStatus.VISIBLE:
 					print("PRESSED!")
-					element_.press()
-					element_.phase = InteractablePhase.HOVER
-"""
+					element_.click()
 			for input_box in inputs:
 				if ElementCollide(input_box, mouse_pos):
 					input_box.selected = True
@@ -312,13 +383,3 @@ def ProcessElements(events, pressed_keys, mouse_pos, elements:list = [], inputs:
 							input_box.remove()
 					else: 
 						input_box.add(event.unicode)
-"""
-
-
-def RenderElements(elements:list = [], inputs:list = [], texts:list = []):
-	for element_ in elements:
-		element_.render()
-	for input_ in inputs:
-		input_.render()
-	for text_ in texts:
-		text_.render()
