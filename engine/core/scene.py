@@ -6,7 +6,7 @@ class Scene:
     def process_input(self, events, pressed_keys, mouse_pos):
         pass
     
-    def update(self):
+    def update(self, delta_time):
         pass
     
     def render(self):

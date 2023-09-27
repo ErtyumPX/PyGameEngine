@@ -2,15 +2,17 @@ import pygame
 import numpy as np
 from scene import Scene
 from math import sqrt
+from inspect import isfunction
 
 class Game:
     def __init__(self, first_scene:Scene, frame_rate:int):
         assert isinstance(first_scene, Scene)
-        self.active_scene = first_scene
-        self.frame_rate = frame_rate
-        self.clock = pygame.time.Clock()
+        self.active_scene: Scene = first_scene
+        self.frame_rate: int = frame_rate
+        self.clock: pygame.time.Clock = pygame.time.Clock()
+        self.delta_time: int = 0
 
-        self.last_function = lambda: 0
+        self.closing_function = lambda: 0
 
     def run(self): 
         while self.active_scene is not None:
@@ -28,7 +30,7 @@ class Game:
 
             # Manage scene
             self.active_scene.process_input(filtered_events, pressed_keys, mouse_pos)
-            self.active_scene.update()
+            self.active_scene.update(self.delta_time)
             if self.active_scene == self.active_scene.next_scene:
                 self.active_scene.render()
             else:
@@ -36,10 +38,11 @@ class Game:
 
             # Update and tick
             pygame.display.flip()
-            self.clock.tick(self.frame_rate)
+            self.delta_time = self.clock.tick(self.frame_rate)
 
         # Call last function before shutting down the window
-        self.last_function()
+        if isfunction(self.closing_function):
+            self.closing_function()
         print("End of the game.")
 
 
