@@ -3,14 +3,14 @@ class Scene:
         self.surface = surface
         self.next_scene = self
 
-    def process_input(self, events, pressed_keys, mouse_pos):
+    def process_input(self, events: list, pressed_keys, mouse_pos: tuple) -> None:
         pass
     
-    def update(self, delta_time):
+    def update(self, delta_time: int) -> None:
         pass
     
-    def render(self):
+    def render(self) -> None:
         pass
 
-    def terminate(self):
+    def terminate(self) -> None:
         self.next_scene = None
