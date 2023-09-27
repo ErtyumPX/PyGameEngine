@@ -1,3 +1,13 @@
+# TODO: InputBox should be refactored 
+# TODO: For all elements that are rendering more than 1 element, the sub/child elements should be rendered
+# on the parent surface but not the root surface, and parent and child surfaces should be updated only when
+# a factor that effects the render output changes inside the child or parent element
+# TODO: More elements should be added -> CheckBox, ToggleButton, Slider, Image etc
+# TODO: All interactables - button, checkbox, toggle button etc - should be inherited from the InteractableElement class
+# TODO: InputBox with multiline support 
+	# Main issues are: Cursor position, adding new lines and going to the next line when the word is too long
+# TODO: Hotkeys could be added and bound to interactable elements
+
 import pygame
 from pygame.rect import Rect
 from enum import Enum
