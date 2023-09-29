@@ -47,7 +47,9 @@ def GetScenesFromPath(path:str) -> None:
             active_scene_module_stem = path_i.stem
             active_scene_path = path
             last_modified_time = Path(active_scene_path).stat().st_mtime
-            OpenDesignerForScene(type_class(root), (800, 500)) # TODO: currently the size is hardcoded
+            new_scene = type_class(root)
+            new_scene_size = new_scene.size
+            OpenDesignerForScene(new_scene, new_scene_size)
             return
 
 def CheckIfTheFileIsModified() -> None:
@@ -55,7 +57,7 @@ def CheckIfTheFileIsModified() -> None:
     global last_modified_time
     current_modified_time = Path(active_scene_path).stat().st_mtime
     if current_modified_time != last_modified_time:
-        print("Reloading")
+        print("Reloading Scene...")
         last_modified_time = current_modified_time
         ReloadScene(active_scene_module_stem)
 
@@ -65,7 +67,9 @@ def ReloadScene(stem:str=None) -> None:
     for type_ in dir(imported_module):
         type_class = getattr(imported_module, type_)
         if(IsInheritFromScene(type_class)):
-            OpenDesignerForScene(type_class(root), (800, 500)) # TODO: currently the size is hardcoded
+            new_scene = type_class(root)
+            new_scene_size = new_scene.size
+            OpenDesignerForScene(new_scene, new_scene_size)
             return
 
 select_path_button: Button = Button(root, SIZE[0]/2, SIZE[1]/2, 200, 50, text="Select Path", func=OpenFileExplorer, alignment=Alignment.CENTER)

@@ -1,7 +1,8 @@
 class Scene:
-    def __init__(self, surface):
+    def __init__(self, surface, size):
         self.surface = surface
         self.next_scene = self
+        self.size = size
 
     def process_input(self, events: list, pressed_keys, mouse_pos: tuple) -> None:
         pass

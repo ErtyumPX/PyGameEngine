@@ -1,5 +1,4 @@
 import pygame
-import numpy as np
 from scene import Scene
 from math import sqrt
 from inspect import isfunction
