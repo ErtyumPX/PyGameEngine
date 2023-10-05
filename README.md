@@ -10,13 +10,9 @@ This project is [MIT](https://github.com/ErtyumPX/PyGameEngine/blob/main/LICENSE
 
 ## Setup
 
-The folder "engine" is the main library. After you clone or download the repository, you can add the folder to your project and address it:
-```python
-import engine.ui_elements
-```
-Or, more easily...... 
+The directory engine/core is the main library. After you clone or download the repository, you can add the it to your project. A more thorough setup will be added soon.
 
-Beware that used Python version of this project is [3.8.3](https://www.python.org/downloads/release/python-383).
+Beware that used Python version of this project is [3.8.3](https://www.python.org/downloads/release/python-383) and the used Pygame version is [2.0.1](https://www.pygame.org/project/5409/7928).
 
 ## It Consists...
 
@@ -32,15 +28,11 @@ There will be a multi-line supporting input box after fixing some certain bugs.
 
 ### Animation
 
-An [animation library](https://github.com/ErtyumPX/PyGameEngine/blob/main/engine/core/animation.py), to change a variable from one value to another by using threading. It has two main functions: By Speed and By Duration.
-
-By Speed function changes the value by a certain amount in every frame, usefull for situations when the speed is defined but the duration of the animation is not important.
-
-By Duration function changes the value in a linearly and reaches to the end poing in the given time span.
+An [animation library](https://github.com/ErtyumPX/PyGameEngine/blob/main/engine/core/animation.py), to change a value asyncronously. It's currently being refactored and the new version will be presented soon.
 
 ### Renderer
 
-A little [render manager](https://github.com/ErtyumPX/PyGameEngine/blob/main/engine/core/renderer.py) for updating and rendering all objects in one function in every scene. Once you register an object, it will rendered every time render method of the renderer is called, until it is removed from the render manager.
+A [render manager](https://github.com/ErtyumPX/PyGameEngine/blob/main/engine/core/renderer.py) for updating and rendering all objects in one function in every scene. Once you register an object, it will rendered every time render method is called, until it is removed from the render manager. While registering, the user could specify the z-index to decide the depth of the element while rendering.
 
 ## Other Practices Used By The Author
 
