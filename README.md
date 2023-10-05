@@ -44,10 +44,39 @@ A little [render manager](https://github.com/ErtyumPX/PyGameEngine/blob/main/eng
 
 ## Other Practices Used By The Author
 
+This section represents the practices used by the developers.
+
 ### main.py
+
+The file that is used to create the root of the game and to run it. You can mainly create your Game class instance here and run the game by initializing the first scene.
 
 ### defaults.py
 
+Mainly used to hold all the constants and static values in one place that  will be used across the project. It's important not to import modules that could cause circular import error.
+
 ### Scene Scripting
 
-### Inheriting from Sprite
+A sincere suggestion is to create a script for all classes that will derive from [Scene](https://github.com/ErtyumPX/PyGameEngine/blob/main/engine/core/scene.py). A basic Scene looks like this:
+
+```python
+from scene import Scene
+from renderer import RenderManager
+from ui_elements import Button, ProcessElements
+import pygame, defaults
+
+class MenuScene(Scene):
+    def __init__(self, main_surface):
+        Scene.__init__(main_surface)
+        self.render_manager = RenderManager(main_surface, background_color=(80, 80, 80))
+        self.BUTTONS = [Button(main_surface, x=10, y=10), Button(main_surface, x=100, y=100)]
+        self.render_manager.register_all(self.BUTTONS)
+
+    def process_input(self, events: list, pressed_keys, mouse_pos: tuple) -> None:
+        ProcessElements(events, pressed_keys, mouse_pos, self.BUTTONS)
+    
+    def update(self, delta_time: int) -> None:
+        pass
+    
+    def render(self) -> None:
+        self.render_manager.render()
+```
