@@ -1,4 +1,5 @@
-# [] TODO: InputBox should be refactored 
+# [x] TODO: InputBox should be refactored 
+# [] TODO: InputBox find_next_word_index should be fixed according to the common sense with DELETE key
 # [] TODO: For all elements that are rendering more than 1 element, the sub/child elements should be rendered
 # on the parent surface but not the root surface, and parent and child surfaces should be updated only when
 # a factor that effects the render output changes inside the child or parent element
