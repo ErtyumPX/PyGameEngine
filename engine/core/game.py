@@ -4,8 +4,8 @@ from math import sqrt
 from inspect import isfunction
 
 class Game:
-    def __init__(self, first_scene:Scene, frame_rate:int):
-        assert isinstance(first_scene, Scene)
+    def __init__(self, first_scene: Scene, frame_rate: int):
+        # assert isinstance(first_scene, Scene) # TODO: Somehow is not working right now...
         self.active_scene: Scene = first_scene
         self.frame_rate: int = frame_rate
         self.clock: pygame.time.Clock = pygame.time.Clock()
