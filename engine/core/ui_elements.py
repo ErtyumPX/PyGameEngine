@@ -167,6 +167,20 @@ def ElementCollide(element:InterfaceElement, mouse_position) -> bool:
 	return element.rect.collidepoint(mouse_position)
 
 
+class Canvas(InterfaceElement):
+	"""
+	Empty element to be used as a container and a parent for other elements.
+	It's important to have a 1 parent for all elements, to increase performance.
+	Canvas element does not have any background, it has an empty surface to blit other elements on it.
+	Ideally there should be only 1 canvas element in a scene.
+	"""
+	def __init__(self, root_surface: Surface, status: InterfaceStatus = InterfaceStatus.VISIBLE, 
+			  	x: int = 0, y: int = 0, width: int = 0, height: int = 0, 
+				alignment: Alignment = Alignment.LEFT_TOP, parent=None):
+		super().__init__(root_surface, status, x, y, width, height, alignment, parent)
+		self.surface: Surface = Surface((width, height))
+
+
 class Text(InterfaceElement):
 	def __init__(self, root_surface, x:int = 0, y:int = 0,  
 			  	text:str = "New Text", font_size:int = 11, color:tuple = (0,0,0), 
