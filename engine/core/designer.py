@@ -10,12 +10,12 @@ tk.Tk().withdraw()
 
 #CONSTANTS
 FRAME_RATE = 120
-WINDOW_NAME = "PyGame Designer"
-SIZE = 800, 500
+WINDOW_NAME = "Designer"
+INITIAL_SIZE = (250, 80)
 
 pygame.init()
 pygame.mouse.set_cursor(*pygame.cursors.broken_x)
-root = pygame.display.set_mode(SIZE)
+root = pygame.display.set_mode(INITIAL_SIZE)
 pygame.display.set_caption(WINDOW_NAME)
 clock = pygame.time.Clock()
 
@@ -26,11 +26,11 @@ def OpenFileExplorer() -> None:
 def IsInheritFromScene(class_type:type) -> bool:
     return type(class_type) is type and issubclass(class_type, Scene) and class_type != Scene
 
-def OpenDesignerForScene(new_scene:Scene, new_size:tuple = None) -> None:
+def OpenDesignerForScene(new_scene: Scene, new_size: tuple = None) -> None:
     global designer_active, active_scene, root
     active_scene = new_scene
     print(active_scene)
-    if new_size is not None:
+    if new_size is not None and root.get_size() != new_size:
         root = pygame.display.set_mode(new_size)
     designer_active = True
 
@@ -72,7 +72,7 @@ def ReloadScene(stem:str=None) -> None:
             OpenDesignerForScene(new_scene, new_scene_size)
             return
 
-select_path_button: Button = Button(root, SIZE[0]/2, SIZE[1]/2, 200, 50, text="Select Path", func=OpenFileExplorer, alignment=Alignment.CENTER)
+select_path_button: Button = Button(root, INITIAL_SIZE[0]/2, INITIAL_SIZE[1]/2, 200, 50, text="Select Path", click_fuction=OpenFileExplorer, alignment=Alignment.CENTER)
 
 designer_active: bool = True
 
