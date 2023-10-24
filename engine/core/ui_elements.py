@@ -29,24 +29,11 @@ INPUTBOX_CURSOR_BLINK_INTERVAL = 0.6 # In seconds
 _DEPRECATED_VALID_INPUT_CHARACTERS = r'[^\.A-Za-z0-9 _]'
 _DEPRECATED_INPUTBOX_CURSOR_CHARACTER = "|"
 
-"""
-class InterfaceElement:
-	def __init__(self, status):
-		self.image = None
-		self.x = 0
-		self.y = 0
-		self.status = InterfaceStatus.VISIBLE
-
-	def change_status(self, new_status):
-		if -1 < new_status < 3:
-			self.status = new_status
-		else:
-			raise Exception("Improper status")
-"""	
 class InterfaceStatus(Enum):
 	VISIBLE = 0
 	VISIBLE_UNINTERACTABLE = 1
 	INVISIBLE = 2
+
 
 class Alignment(Enum):
 	LEFT_TOP = 0
@@ -59,37 +46,86 @@ class Alignment(Enum):
 	BOTTOM = 7
 	RIGHT_BOTTOM = 8
 
+
 class InterfaceElement:
+	"""
+	Do not change rect properties directy, use move_to() and resize() methods instead
+	"""
 	def __init__(self, root_surface:Surface, 
 			  	status:InterfaceStatus = InterfaceStatus.VISIBLE, 
 			  	x:int = 0, y:int = 0, width:int = 0, height:int = 0, 
-				alignment:Alignment = Alignment.LEFT_TOP):
-		self.root_surface:Surface = root_surface
-		self.rect:Rect = Rect(x, y, width, height)
-		self.status:InterfaceStatus = status
-		self._alignment:Alignment = alignment
+				alignment:Alignment = Alignment.LEFT_TOP,
+				parent = None):
+		self.root_surface: Surface = root_surface
+		self.rect: Rect = Rect(x, y, width, height)
+		self.status: InterfaceStatus = status
+		self._alignment: Alignment = alignment
+		self._parent: InterfaceElement = parent
+		self.children: list = []
+		self.should_update = False
 		AlignRect(self)
 	
-	def change_status(self, new_status):
+	@property
+	def parent(self):
+		"""Parent element of the current element, returns an InterfaceElement object"""
+		return self._parent
+
+	@parent.setter
+	def parent(self, new_parent) -> None:
+		# TODO: Type check will be added when the system is ready
+		# assert isinstance(new_parent, InterfaceElement) or issubclass(type(new_parent), InterfaceElement)
+		self._parent = new_parent
+		self.root_surface = new_parent.root_surface
+
+	def add_child(self, child) -> None:
+		# TODO: Type check will be added when the system is ready
+		# assert isinstance(new_parent, InterfaceElement) or issubclass(type(new_parent), InterfaceElement)
+		self.children.append(child)
+		self.should_update = True
+
+	def trigger_update(self) -> None:
+		self.should_update = True
+		if self.parent:
+			self.parent.trigger_update()
+
+	def change_status(self, new_status) -> None:
 		assert new_status in InterfaceStatus
 		self.status = new_status
 
 	@property
-	def alignment(self):
+	def alignment(self) -> Alignment:
 		return self._alignment
 
 	@alignment.setter
-	def alignment(self, new_alignment):
+	def alignment(self, new_alignment) -> None:
 		self._alignment = new_alignment
 		AlignRect(self)
+		self.should_update = True
 	
-	def move_to(self, x, y):
+	def move_to(self, x, y) -> None:
 		self.rect.x = x
 		self.rect.y = y
 		AlignRect(self)
+		self.trigger_update()
+	
+	def resize(self, width, height) -> None:
+		self.rect.width = width
+		self.rect.height = height
+		AlignRect(self)
+		self.trigger_update()
 
-	def render(self):
-		pass
+	def update(self) -> None:
+		for child in self.children:
+			child.update()
+			child.render()
+
+	def render(self) -> None:
+		if self.status == InterfaceStatus.INVISIBLE: return
+		if self.should_update:
+			self.update()
+			self.should_update = False
+		self.root_surface.blit(self.surface, (self.rect.x, self.rect.y))
+
 
 def AlignRect(element:InterfaceElement) -> None:
 	"""
@@ -123,46 +159,13 @@ def AlignRect(element:InterfaceElement) -> None:
 		element.rect.right = element.rect.x
 		element.rect.bottom = element.rect.y
 
+
 def ElementCollide(element:InterfaceElement, mouse_position) -> bool:
 	"""
 	Checks if the mouse is colliding with the button
 	"""
 	return element.rect.collidepoint(mouse_position)
 
-"""
-class ImageButton(pygame.sprite.Sprite, InterfaceElement):
-	def __init__(self, surface, image, x, y, image_percentage=100, func=empty_function, args=(), kwargs={}, upper_surface=(0,0), selected_change=(0,0), highlight_color = None, highlight_offset = (0, 0), status=0):
-		pygame.sprite.Sprite.__init__(self)
-		InterfaceElement.__init__(self, status)
-		self.surface = surface
-		fraction = image_percentage/100
-		self.image = pygame.transform.scale(image, (int(image.get_width()*fraction), int(image.get_height()*fraction)))
-		self.x = x
-		self.y = y
-		self.upper_surface = upper_surface
-		self.selected_change = selected_change
-		self.selected = False
-		self.clicked = False
-
-		self.func = func
-		self.args = args
-		self.kwargs = kwargs
-
-		self.highlight_color = highlight_color
-		self.highlight_offset = highlight_offset
-		if highlight_color:
-			image_size = image.get_size()
-			self.effect = Surface((image_size[0]+highlight_offset[0], image_size[1]+highlight_offset[1]), pygame.SRCALPHA)
-			self.effect.fill(highlight_color)
-
-	def update(self):
-		if self.status != 2:
-			if self.selected:
-				self.surface.blit(self.image, (self.x+self.selected_change[0], self.y+self.selected_change[1]))
-				if self.highlight_color: self.surface.blit(self.effect, (self.x+self.selected_change[0]-self.highlight_offset[0]/2, self.y+self.selected_change[1]-self.highlight_offset[1]/2))
-			else:
-				self.surface.blit(self.image, (self.x, self.y))
-"""
 
 class Text(InterfaceElement):
 	def __init__(self, root_surface, x:int = 0, y:int = 0,  
@@ -215,7 +218,7 @@ class Button(InterfaceElement):
 				hover_color: tuple = (0,0,0,50), pressed_color: tuple = (0,0,0,150),
 				hover_event: callable = EMPTY_FUNCTION, hover_args:tuple = tuple(), hover_kwargs:dict = {},
 				pressed_event: callable = EMPTY_FUNCTION, pressed_args:tuple = tuple(), pressed_kwargs:dict = {}):
-		self.surface = Surface((width, height))
+		self.surface: Surface = Surface((width, height))
 		self.surface.fill(background)
 		pygame.draw.rect(self.surface, border_color, (0, 0, width, height), border_width)
 
