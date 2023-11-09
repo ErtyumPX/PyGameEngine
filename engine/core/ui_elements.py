@@ -83,6 +83,10 @@ class InterfaceElement:
 		self.children.append(child)
 		self.should_update = True
 
+	def add_children(self, children:list) -> None:
+		self.children.extend(children)
+		self.should_update = True
+
 	def trigger_update(self) -> None:
 		self.should_update = True
 		if self.parent:
